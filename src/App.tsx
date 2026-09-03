@@ -1,30 +1,47 @@
 import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
 import Sidebar from './components/Sidebar'
-import StatCard from './components/StatCard'
+import Dashboard from './pages/Dashboard'
+import Clientes from './pages/Clientes'
+import Productos from './pages/Productos'
+import Ventas from './pages/Ventas'
+import Inventario from './pages/Inventario'
+import Reportes from './pages/Reportes'
 import './App.css'
 
 function App() {
+  const [paginaActual, setPaginaActual] = useState('dashboard')
+
+  function mostrarPagina() {
+    switch (paginaActual) {
+      case 'productos':
+        return <Productos />
+
+      case 'clientes':
+        return <Clientes />
+
+      case 'ventas':
+        return <Ventas />
+
+      case 'inventario':
+        return <Inventario />
+
+      case 'reportes':
+        return <Reportes />
+
+      default:
+        return <Dashboard />
+    }
+  }
+
   return (
     <div className="app">
-      <Sidebar />
+      <Sidebar
+        paginaActual={paginaActual}
+        cambiarPagina={setPaginaActual}
+      />
 
       <main className="main-content">
-        <header className="page-header">
-          <div>
-            <h1>Dashboard</h1>
-            <p>Resumen general del sistema de créditos</p>
-          </div>
-        </header>
-
-        <section className="stats-grid">
-          <StatCard title="Clientes" value={125} />
-          <StatCard title="Créditos activos" value={48} />
-          <StatCard title="Pendientes" value={12} />
-          <StatCard title="Aprobados este mes" value={21} />
-        </section>
+        {mostrarPagina()}
       </main>
     </div>
   )
