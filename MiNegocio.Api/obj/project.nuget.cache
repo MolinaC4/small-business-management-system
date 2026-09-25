@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "cdL45g6j1Xs=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Alejandra Melendez\\Proyectos\\sistema-creditos\\MiNegocio.Api\\MiNegocio.Api.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Alejandra Melendez\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.12\\microsoft.aspnetcore.openapi.10.0.12.nupkg.sha512",
+    "C:\\Users\\Alejandra Melendez\\.nuget\\packages\\microsoft.openapi\\2.12.0\\microsoft.openapi.2.12.0.nupkg.sha512"
+  ],
+  "logs": []
+}
