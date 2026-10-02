@@ -1,9 +1,29 @@
+using Microsoft.EntityFrameworkCore;
+using MiNegocio.Api.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ReactApp", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
+builder.Services.AddDbContext<MiNegocioDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("MiNegocioConnection")
+    )
+);
 
 var app = builder.Build();
 
@@ -33,6 +53,8 @@ app.MapGet("/weatherforecast", () =>
     return forecast;
 })
 .WithName("GetWeatherForecast");
+
+app.UseCors("ReactApp");
 
 app.MapControllers();
 app.Run();

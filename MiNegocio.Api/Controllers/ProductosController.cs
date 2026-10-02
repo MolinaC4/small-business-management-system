@@ -1,53 +1,33 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using MiNegocio.Api.Data;
 using MiNegocio.Api.Models;
 
 namespace MiNegocio.Api.Controllers;
 
 [ApiController]
-[Route("api/productos")]
+[Route("api/[controller]")]
 public class ProductosController : ControllerBase
 {
-    private static readonly List<Producto> Productos =
-    [
-        new Producto
-        {
-            Id = 1,
-            Codigo = "PROD-001",
-            Nombre = "Camisa básica",
-            Categoria = "Ropa",
-            PrecioCompra = 4500,
-            PrecioVenta = 7500,
-            Stock = 12,
-            StockMinimo = 5,
-            Activo = true
-        },
+    private readonly MiNegocioDbContext _context;
 
-        new Producto
-        {
-            Id = 2,
-            Codigo = "PROD-002",
-            Nombre = "Pulsera artesanal",
-            Categoria = "Accesorios",
-            PrecioCompra = 1200,
-            PrecioVenta = 2500,
-            Stock = 3,
-            StockMinimo = 5,
-            Activo = true
-        }
-    ];
+    public ProductosController(MiNegocioDbContext context)
+    {
+        _context = context;
+    }
 
     [HttpGet]
-    public ActionResult<IEnumerable<Producto>> ObtenerProductos()
+    public async Task<ActionResult<IEnumerable<Producto>>> ObtenerProductos()
     {
-        return Ok(Productos);
+        var productos = await _context.Productos.ToListAsync();
+
+        return Ok(productos);
     }
 
     [HttpGet("{id}")]
-    public ActionResult<Producto> ObtenerProducto(int id)
+    public async Task<ActionResult<Producto>> ObtenerProducto(int id)
     {
-        var producto = Productos.FirstOrDefault(
-            producto => producto.Id == id
-        );
+        var producto = await _context.Productos.FindAsync(id);
 
         if (producto == null)
         {
@@ -58,15 +38,13 @@ public class ProductosController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult<Producto> CrearProducto(Producto nuevoProducto)
+    public async Task<ActionResult<Producto>> CrearProducto(
+        Producto nuevoProducto
+    )
     {
-        var nuevoId = Productos.Count == 0
-            ? 1
-            : Productos.Max(producto => producto.Id) + 1;
+        _context.Productos.Add(nuevoProducto);
 
-        nuevoProducto.Id = nuevoId;
-
-        Productos.Add(nuevoProducto);
+        await _context.SaveChangesAsync();
 
         return CreatedAtAction(
             nameof(ObtenerProducto),
@@ -76,11 +54,12 @@ public class ProductosController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public IActionResult ActualizarProducto(int id, Producto productoActualizado)
+    public async Task<IActionResult> ActualizarProducto(
+        int id,
+        Producto productoActualizado
+    )
     {
-        var producto = Productos.FirstOrDefault(
-            producto => producto.Id == id
-        );
+        var producto = await _context.Productos.FindAsync(id);
 
         if (producto == null)
         {
@@ -96,22 +75,24 @@ public class ProductosController : ControllerBase
         producto.StockMinimo = productoActualizado.StockMinimo;
         producto.Activo = productoActualizado.Activo;
 
+        await _context.SaveChangesAsync();
+
         return NoContent();
     }
 
     [HttpDelete("{id}")]
-    public IActionResult EliminarProducto(int id)
+    public async Task<IActionResult> EliminarProducto(int id)
     {
-        var producto = Productos.FirstOrDefault(
-            producto => producto.Id == id
-        );
+        var producto = await _context.Productos.FindAsync(id);
 
         if (producto == null)
         {
             return NotFound();
         }
 
-        Productos.Remove(producto);
+        _context.Productos.Remove(producto);
+
+        await _context.SaveChangesAsync();
 
         return NoContent();
     }

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Sidebar from './components/Sidebar'
 import Dashboard from './pages/Dashboard'
 import Clientes from './pages/Clientes'
@@ -12,30 +12,18 @@ import type { Producto } from './types/Producto'
 function App() {
   const [paginaActual, setPaginaActual] = useState('dashboard')
 
-  const [productos, setProductos] = useState<Producto[]>([
-    {
-      id: 1,
-      codigo: 'PROD-001',
-      nombre: 'Camisa básica',
-      categoria: 'Ropa',
-      precioCompra: 4500,
-      precioVenta: 7500,
-      stock: 12,
-      stockMinimo: 5,
-      activo: true
-    },
-    {
-      id: 2,
-      codigo: 'PROD-002',
-      nombre: 'Pulsera artesanal',
-      categoria: 'Accesorios',
-      precioCompra: 1200,
-      precioVenta: 2500,
-      stock: 3,
-      stockMinimo: 5,
-      activo: true
-    }
-  ])
+  const [productos, setProductos] = useState<Producto[]>([]) 
+  
+  useEffect(() => {
+    fetch('http://localhost:5204/api/productos')
+      .then(response => response.json())
+      .then(data => {
+        setProductos(data)
+      })
+      .catch(error => {
+        console.error('Error al cargar productos:', error)
+      })
+  }, [])
 
   function mostrarPagina() {
     switch (paginaActual) {

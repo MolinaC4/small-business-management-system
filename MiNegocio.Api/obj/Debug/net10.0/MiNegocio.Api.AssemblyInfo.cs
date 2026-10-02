@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MiNegocio.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+75996d1b0aec2a6465f1d72ec3bf8f55f2b56037")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+593af353c5fe3ce1063106b84c9b33c2983769fe")]
 [assembly: System.Reflection.AssemblyProductAttribute("MiNegocio.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MiNegocio.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
