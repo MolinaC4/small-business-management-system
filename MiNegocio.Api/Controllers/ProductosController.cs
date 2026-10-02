@@ -42,6 +42,38 @@ public class ProductosController : ControllerBase
         Producto nuevoProducto
     )
     {
+        var categoria = await _context.Categorias
+            .FindAsync(nuevoProducto.CategoriaId);
+
+        if (categoria == null)
+        {
+            return BadRequest("La categoría seleccionada no existe.");
+        }
+
+        var ultimoProducto = await _context.Productos
+            .Where(producto =>
+                producto.Codigo.StartsWith(categoria.Prefijo + "-"))
+            .OrderByDescending(producto => producto.Id)
+            .FirstOrDefaultAsync();
+
+        int siguienteConsecutivo = 1;
+
+        if (ultimoProducto != null)
+        {
+            var partesCodigo = ultimoProducto.Codigo.Split('-');
+
+            if (partesCodigo.Length == 2 &&
+                int.TryParse(partesCodigo[1], out int ultimoConsecutivo))
+            {
+                siguienteConsecutivo = ultimoConsecutivo + 1;
+            }
+        }
+
+        nuevoProducto.Codigo =
+            $"{categoria.Prefijo}-{siguienteConsecutivo:D4}";
+
+        nuevoProducto.Activo = true;
+
         _context.Productos.Add(nuevoProducto);
 
         await _context.SaveChangesAsync();

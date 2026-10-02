@@ -272,7 +272,8 @@ th {
   font-weight: 600;
 }
 
-.product-form input {
+.product-form input,
+.product-form select {
   padding: 10px;
   border: 1px solid #d1d5db;
   border-radius: 6px;

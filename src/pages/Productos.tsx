@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import type { Categoria } from '../types/Categoria'
 import type { Producto } from '../types/Producto'
 
 type ProductosProps = {
@@ -12,9 +13,9 @@ function Productos({
 }: ProductosProps) {
 
   // Estados del formulario
-  const [codigo, setCodigo] = useState('')
   const [nombre, setNombre] = useState('')
-  const [categoria, setCategoria] = useState('')
+  const [categorias, setCategorias] = useState<Categoria[]>([])
+  const [categoriaId, setCategoriaId] = useState('')
   const [precioCompra, setPrecioCompra] = useState('')
   const [precioVenta, setPrecioVenta] = useState('')
   const [stock, setStock] = useState('')
@@ -25,10 +26,20 @@ function Productos({
   const [productoEditandoId, setProductoEditandoId] =
     useState<number | null>(null)
 
+  useEffect(() => {
+    fetch('http://localhost:5204/api/categorias')
+      .then(response => response.json())
+      .then(data => {
+        setCategorias(data)
+      })
+      .catch(error => {
+        console.error('Error al cargar categorías:', error)
+      })
+  }, [])
+
   function limpiarFormulario() {
-    setCodigo('')
     setNombre('')
-    setCategoria('')
+    setCategoriaId('')
     setPrecioCompra('')
     setPrecioVenta('')
     setStock('')
@@ -36,72 +47,152 @@ function Productos({
     setProductoEditandoId(null)
   }
 
-  function guardarProducto(event: React.FormEvent<HTMLFormElement>) {
+  async function guardarProducto(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    // Si hay un ID guardado, estamos editando.
-    if (productoEditandoId !== null) {
+    // Convertimos los valores del formulario a números
+    const precioCompraNumero = Number(precioCompra)
+    const precioVentaNumero = Number(precioVenta)
+    const stockNumero = Number(stock)
+    const stockMinimoNumero = Number(stockMinimo)
 
-      const productosActualizados = productos.map(producto => {
-
-        if (producto.id === productoEditandoId) {
-          return {
-            ...producto,
-            codigo,
-            nombre,
-            categoria,
-            precioCompra: Number(precioCompra),
-            precioVenta: Number(precioVenta),
-            stock: Number(stock),
-            stockMinimo: Number(stockMinimo)
-          }
-        }
-
-        return producto
-      })
-
-      setProductos(productosActualizados)
-
-    } else {
-
-      // Si no estamos editando, creamos un producto nuevo.
-      const nuevoProducto: Producto = {
-        id: Date.now(),
-        codigo,
-        nombre,
-        categoria,
-        precioCompra: Number(precioCompra),
-        precioVenta: Number(precioVenta),
-        stock: Number(stock),
-        stockMinimo: Number(stockMinimo),
-        activo: true
-      }
-
-      setProductos([...productos, nuevoProducto])
+    // Validaciones
+    if (nombre.trim() === '') {
+      alert('Debe ingresar el nombre del producto.')
+      return
     }
 
-    limpiarFormulario()
+    if (categoriaId === '') {
+      alert('Debe seleccionar una categoría.')
+      return
+    }
+
+    if (precioCompraNumero < 0 || precioVentaNumero < 0) {
+      alert('Los precios no pueden ser negativos.')
+      return
+    }
+
+    if (precioVentaNumero < precioCompraNumero) {
+      alert('El precio de venta no puede ser menor que el precio de compra.')
+      return
+    }
+
+    if (stockNumero < 0 || stockMinimoNumero < 0) {
+      alert('El stock no puede ser negativo.')
+      return
+    }
+
+    if (!Number.isInteger(stockNumero) || !Number.isInteger(stockMinimoNumero)) {
+      alert('El stock debe ser un número entero.')
+      return
+    }
+
+    const datosProducto = {
+      nombre: nombre.trim(),
+      categoriaId: Number(categoriaId),
+      precioCompra: precioCompraNumero,
+      precioVenta: precioVentaNumero,
+      stock: stockNumero,
+      stockMinimo: stockMinimoNumero,
+      activo: true
+    }
+
+    try {
+      // EDITAR
+      if (productoEditandoId !== null) {
+        const response = await fetch(
+          `http://localhost:5204/api/productos/${productoEditandoId}`,
+          {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(datosProducto)
+          }
+        )
+
+        if (!response.ok) {
+          throw new Error('No se pudo actualizar el producto.')
+        }
+
+        // Por ahora actualizamos el estado de React después del PUT.
+        setProductos(productos.map(producto =>
+          producto.id === productoEditandoId
+            ? {
+                ...producto,
+                ...datosProducto
+              }
+            : producto
+        ))
+      }
+
+      // CREAR
+      else {
+        const response = await fetch(
+          'http://localhost:5204/api/productos',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(datosProducto)
+          }
+        )
+
+        if (!response.ok) {
+          throw new Error('No se pudo guardar el producto.')
+        }
+
+        const productoCreado: Producto = await response.json()
+
+        setProductos([...productos, productoCreado])
+      }
+
+      limpiarFormulario()
+    } catch (error) {
+      console.error(error)
+      alert('Ocurrió un error al guardar el producto.')
+    }
   }
 
   function editarProducto(producto: Producto) {
     setProductoEditandoId(producto.id)
-
-    setCodigo(producto.codigo)
     setNombre(producto.nombre)
-    setCategoria(producto.categoria)
+    setCategoriaId(producto.categoriaId.toString())
     setPrecioCompra(producto.precioCompra.toString())
     setPrecioVenta(producto.precioVenta.toString())
     setStock(producto.stock.toString())
     setStockMinimo(producto.stockMinimo.toString())
   }
 
-  function eliminarProducto(id: number) {
-
-    const productosActualizados = productos.filter(
-      producto => producto.id !== id
+  async function eliminarProducto(id: number) {
+    const confirmar = window.confirm(
+      '¿Está seguro de que desea eliminar este producto?'
     )
 
-    setProductos(productosActualizados)
+    if (!confirmar) {
+      return
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:5204/api/productos/${id}`,
+        {
+          method: 'DELETE'
+        }
+      )
+
+      if (!response.ok) {
+        throw new Error('No se pudo eliminar el producto.')
+      }
+
+      setProductos(
+        productos.filter(producto => producto.id !== id)
+      )
+    } catch (error) {
+      console.error(error)
+      alert('Ocurrió un error al eliminar el producto.')
+    }
   }
 
   return (
@@ -125,16 +216,6 @@ function Productos({
           </h2>
 
           <label>
-            Código
-            <input
-              type="text"
-              value={codigo}
-              onChange={event => setCodigo(event.target.value)}
-              required
-            />
-          </label>
-
-          <label>
             Nombre
             <input
               type="text"
@@ -146,12 +227,22 @@ function Productos({
 
           <label>
             Categoría
-            <input
-              type="text"
-              value={categoria}
-              onChange={event => setCategoria(event.target.value)}
+            <select
+              value={categoriaId}
+              onChange={event => setCategoriaId(event.target.value)}
               required
-            />
+            >
+              <option value="">Seleccione una categoría</option>
+
+              {categorias.map(categoria => (
+                <option
+                  key={categoria.id}
+                  value={categoria.id}
+                >
+                  {categoria.nombre}
+                </option>
+              ))}
+            </select>
           </label>
 
           <label>
@@ -251,7 +342,13 @@ function Productos({
 
                   <td>{producto.nombre}</td>
 
-                  <td>{producto.categoria}</td>
+                  <td>
+                    {
+                      categorias.find(
+                        categoria => categoria.id === producto.categoriaId
+                      )?.nombre ?? 'Sin categoría'
+                    }
+                  </td>
 
                   <td>
                     ₡{producto.precioVenta.toLocaleString()}
