@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { Categoria } from '../types/Categoria'
 import type { Producto } from '../types/Producto'
+import { API_URL } from '../config/api'
 
 type ProductosProps = {
   productos: Producto[]
@@ -27,7 +28,7 @@ function Productos({
     useState<number | null>(null)
 
   useEffect(() => {
-    fetch('http://localhost:5204/api/categorias')
+    fetch(`${API_URL}/api/categorias`)
       .then(response => response.json())
       .then(data => {
         setCategorias(data)
@@ -101,7 +102,7 @@ function Productos({
       // EDITAR
       if (productoEditandoId !== null) {
         const response = await fetch(
-          `http://localhost:5204/api/productos/${productoEditandoId}`,
+          `${API_URL}/api/productos/${productoEditandoId}`,
           {
             method: 'PUT',
             headers: {
@@ -129,7 +130,7 @@ function Productos({
       // CREAR
       else {
         const response = await fetch(
-          'http://localhost:5204/api/productos',
+          `${API_URL}/api/productos`,
           {
             method: 'POST',
             headers: {
@@ -176,7 +177,7 @@ function Productos({
 
     try {
       const response = await fetch(
-        `http://localhost:5204/api/productos/${id}`,
+        `${API_URL}/api/productos/${id}`,
         {
           method: 'DELETE'
         }

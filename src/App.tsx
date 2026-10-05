@@ -8,6 +8,7 @@ import Inventario from './pages/Inventario'
 import Reportes from './pages/Reportes'
 import './App.css'
 import type { Producto } from './types/Producto'
+import { API_URL } from './config/api'
 
 function App() {
   const [paginaActual, setPaginaActual] = useState('dashboard')
@@ -15,7 +16,7 @@ function App() {
   const [productos, setProductos] = useState<Producto[]>([]) 
   
   useEffect(() => {
-    fetch('http://localhost:5204/api/productos')
+    fetch(`${API_URL}/api/productos`)
       .then(response => response.json())
       .then(data => {
         setProductos(data)
