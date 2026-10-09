@@ -415,3 +415,293 @@ th {
   background: #9ca3af;
   cursor: not-allowed;
 }
+
+.datos-cliente {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.datos-cliente h3 {
+  margin: 0 0 6px;
+  color: #1e293b;
+  font-size: 18px;
+}
+
+.datos-cliente-descripcion {
+  color: #64748b;
+  font-size: 13px;
+  margin-bottom: 18px;
+}
+
+.datos-cliente-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.campo-cliente {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.campo-cliente label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.campo-cliente input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 14px;
+  background: #ffffff;
+  color: #0f172a;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.campo-cliente input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+@media (max-width: 600px) {
+  .datos-cliente-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Mensajes de ventas */
+
+.mensaje-venta {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  border: 1px solid;
+}
+
+.mensaje-contenido {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.mensaje-contenido strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.mensaje-contenido p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.mensaje-icono {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  font-weight: bold;
+}
+
+.mensaje-exito {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+  color: #166534;
+}
+
+.mensaje-exito .mensaje-icono {
+  background: #dcfce7;
+}
+
+.mensaje-error {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.mensaje-error .mensaje-icono {
+  background: #fee2e2;
+}
+
+.mensaje-cerrar {
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+.mensaje-cerrar:hover {
+  opacity: 1;
+}
+/* Botón principal de ventas */
+
+.btn-registrar-venta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 13px 24px;
+  border: none;
+  border-radius: 9px;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.btn-registrar-venta:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.btn-registrar-venta:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-registrar-venta:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.btn-registrar-venta:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: 3px;
+}
+
+/* Indicador de carga */
+
+.spinner-venta {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: girar-venta 0.7s linear infinite;
+}
+
+@keyframes girar-venta {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Carrito vacío */
+
+.venta-vacia {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 35px 15px;
+  text-align: center;
+}
+
+.venta-vacia-icono {
+  font-size: 32px;
+  margin-bottom: 5px;
+}
+
+.venta-vacia strong {
+  color: #334155;
+  font-size: 15px;
+}
+
+.venta-vacia p {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+/* Resumen de venta */
+
+.sale-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  margin-top: 24px;
+  padding-top: 22px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.sale-summary .payment-section {
+  margin-top: 0;
+  flex: 1;
+  max-width: 250px;
+}
+
+.sale-summary .payment-section select {
+  width: 100%;
+  font-size: 14px;
+}
+
+.sale-summary .sale-total {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.sale-summary .sale-total span {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.sale-summary .sale-total strong {
+  font-size: 30px;
+  color: #172554;
+  white-space: nowrap;
+}
+
+/* Botón de registrar venta */
+
+.btn-registrar-venta {
+  width: 100%;
+  margin-top: 22px;
+  min-height: 46px;
+  transition: background 0.2s, transform 0.2s;
+}
+
+/* Adaptación para pantallas pequeñas */
+
+@media (max-width: 600px) {
+  .sale-summary {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sale-summary .payment-section {
+    max-width: none;
+    width: 100%;
+  }
+
+  .sale-summary .sale-total {
+    align-items: flex-end;
+  }
+}
