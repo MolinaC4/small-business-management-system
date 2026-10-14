@@ -111,4 +111,34 @@ public class VentasController : ControllerBase
             venta.CedulaCliente
         });
     }
+
+    [HttpGet]
+    public async Task<IActionResult> ObtenerVentas()
+    {
+        var ventas = await _context.Ventas
+            .AsNoTracking()
+            .OrderByDescending(venta => venta.Fecha)
+            .ThenByDescending(venta => venta.Id)
+            .Select(venta => new
+            {
+                venta.Id,
+                venta.Fecha,
+                venta.NombreCliente,
+                venta.CedulaCliente,
+                venta.MetodoPago,
+                venta.Total,
+
+                Detalles = venta.Detalles.Select(detalle => new
+                {
+                    detalle.ProductoId,
+                    NombreProducto = detalle.Producto.Nombre,
+                    detalle.Cantidad,
+                    detalle.PrecioUnitario,
+                    detalle.Subtotal
+                }).ToList()
+            })
+            .ToListAsync();
+
+        return Ok(ventas);
+    }
 }
