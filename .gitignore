@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# ASP.NET Core
+/MiNegocio.Api/bin/
+/MiNegocio.Api/obj/
