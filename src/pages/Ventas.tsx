@@ -1,11 +1,17 @@
-import { useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import type { Producto } from '../types/Producto'
 import type { DetalleVenta } from '../types/DetalleVenta'
 import { API_URL } from '../config/api'
+import type { Venta } from '../types/Venta'
 
 type VentasProps = {
   productos: Producto[]
   setProductos: React.Dispatch<React.SetStateAction<Producto[]>>
+}
+
+function convertirFechaVenta(fecha: string): Date {
+  const tieneZonaHoraria = /(?:Z|[+-]\d{2}:\d{2})$/i.test(fecha)
+  return new Date(tieneZonaHoraria ? fecha : `${fecha}Z`)
 }
 
 function Ventas({
@@ -26,6 +32,38 @@ function Ventas({
     tipo: 'exito' | 'error'
     texto: string
   } | null>(null)
+
+  const [historialVentas, setHistorialVentas] = useState<Venta[]>([])
+  const [cargandoHistorial, setCargandoHistorial] = useState(true)
+  const [errorHistorial, setErrorHistorial] = useState('')
+  const [ventaSeleccionada, setVentaSeleccionada] = useState<number | null>(null)
+
+  async function cargarHistorial() {
+    setCargandoHistorial(true)
+    setErrorHistorial('')
+
+    try {
+      const response = await fetch(`${API_URL}/api/ventas`)
+
+      if (!response.ok) {
+        throw new Error('No se pudo consultar el historial de ventas.')
+      }
+
+      const ventas: Venta[] = await response.json()
+      setHistorialVentas(ventas)
+
+    } catch (error) {
+      console.error('Error al consultar ventas:', error)
+      setErrorHistorial('No se pudo cargar el historial de ventas.')
+
+    } finally {
+      setCargandoHistorial(false)
+    }
+  }  
+
+  useEffect(() => {
+    void cargarHistorial()
+  }, [])
 
 
   function agregarProducto() {
@@ -140,13 +178,13 @@ function Ventas({
       return
     }
 
-  if (!metodoPago) {
-    setMensaje({
-      tipo: 'error',
-      texto: 'Debe seleccionar un método de pago.'
-    })
-    return
-  }
+    if (!metodoPago) {
+      setMensaje({
+        tipo: 'error',
+        texto: 'Debe seleccionar un método de pago.'
+      })
+      return
+    }
 
     const datosVenta = {
       nombreCliente: nombreCliente.trim() || null,
@@ -203,6 +241,8 @@ function Ventas({
       setCantidad('1')
       setNombreCliente('')
       setCedulaCliente('')
+
+      void cargarHistorial()
 
     } catch (error) {
       console.error('Error al registrar venta:', error)      
@@ -473,6 +513,141 @@ function Ventas({
 
         </div>
 
+      </section>
+
+      <section className="historial-ventas">
+        <div className="historial-header">
+          <div>
+            <h2>Historial de ventas</h2>
+            <p>Consulta las ventas registradas en el negocio.</p>
+          </div>
+
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={() => void cargarHistorial()}
+            disabled={cargandoHistorial}
+          >
+            {cargandoHistorial ? 'Actualizando...' : 'Actualizar'}
+          </button>
+        </div>
+
+        {cargandoHistorial && <p>Cargando ventas...</p>}
+
+        {errorHistorial && (
+          <p className="historial-error" role="alert">
+            {errorHistorial}
+          </p>
+        )}
+
+        {!cargandoHistorial && !errorHistorial && (
+          historialVentas.length === 0 ? (
+            <p className="historial-vacio">
+              Todavía no hay ventas registradas.
+            </p>
+          ) : (
+            <div className="historial-tabla">
+              <table>
+                <thead>
+                  <tr>
+                    <th>N.º venta</th>
+                    <th>Fecha</th>
+                    <th>Cliente</th>
+                    <th>Método de pago</th>
+                    <th>Total</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {historialVentas.map(venta => (
+                    <Fragment key={venta.id}>
+                      <tr>
+                        <td>#{venta.id}</td>
+
+                        <td>
+                          {convertirFechaVenta(venta.fecha).toLocaleString('es-CR')}
+                        </td>
+
+                        <td>
+                          {venta.nombreCliente || 'Consumidor final'}
+                        </td>
+
+                        <td>
+                          {venta.metodoPago}
+                        </td>
+
+                        <td>
+                          ₡{venta.total.toLocaleString('es-CR')}
+                        </td>
+
+                        <td>
+                          <button
+                            type="button"
+                            className="edit-button"
+                            onClick={() =>
+                              setVentaSeleccionada(
+                                ventaSeleccionada === venta.id
+                                  ? null
+                                  : venta.id
+                              )
+                            }
+                          >
+                            {ventaSeleccionada === venta.id
+                              ? 'Ocultar'
+                              : 'Ver detalle'}
+                          </button>
+                        </td>
+                      </tr>
+
+                      {ventaSeleccionada === venta.id && (
+                        <tr>
+                          <td colSpan={6}>
+                            <div className="historial-detalle">
+                              <h3>Productos de la venta #{venta.id}</h3>
+
+                              {venta.cedulaCliente && (
+                                <p>
+                                  <strong>Cédula:</strong> {venta.cedulaCliente}
+                                </p>
+                              )}
+
+                              <table>
+                                <thead>
+                                  <tr>
+                                    <th>Producto</th>
+                                    <th>Cantidad</th>
+                                    <th>Precio unitario</th>
+                                    <th>Subtotal</th>
+                                  </tr>
+                                </thead>
+
+                                <tbody>
+                                  {venta.detalles.map(detalle => (
+                                    <tr key={detalle.productoId}>
+                                      <td>{detalle.nombreProducto}</td>
+                                      <td>{detalle.cantidad}</td>
+                                      <td>
+                                        ₡{detalle.precioUnitario.toLocaleString('es-CR')}
+                                      </td>
+                                      <td>
+                                        ₡{detalle.subtotal.toLocaleString('es-CR')}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </Fragment>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )
+        )}
       </section>
     </>
   )

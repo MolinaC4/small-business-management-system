@@ -34,14 +34,6 @@ function Sidebar({
           Productos
         </button>
 
-        <button
-          className={`nav-item ${
-            paginaActual === 'clientes' ? 'active' : ''
-          }`}
-          onClick={() => cambiarPagina('clientes')}
-        >
-          Clientes
-        </button>
 
         <button
           className={`nav-item ${

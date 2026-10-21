@@ -122,7 +122,8 @@ public class VentasController : ControllerBase
             .Select(venta => new
             {
                 venta.Id,
-                venta.Fecha,
+                Fecha = DateTime.SpecifyKind(venta.Fecha, DateTimeKind.Utc)
+                    .ToString("O"),
                 venta.NombreCliente,
                 venta.CedulaCliente,
                 venta.MetodoPago,

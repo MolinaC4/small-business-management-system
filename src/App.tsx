@@ -15,6 +15,7 @@ function App() {
 
   const [productos, setProductos] = useState<Producto[]>([]) 
   
+  
   useEffect(() => {
     fetch(`${API_URL}/api/productos`)
       .then(response => response.json())
@@ -48,13 +49,13 @@ function App() {
         )
 
       case 'inventario':
-        return <Inventario />
+        return <Inventario productos={productos} />
 
       case 'reportes':
-        return <Reportes />
+        return <Reportes productos={productos} />
 
       default:
-        return <Dashboard />
+        return <Dashboard productos={productos} />
     }
   }
 

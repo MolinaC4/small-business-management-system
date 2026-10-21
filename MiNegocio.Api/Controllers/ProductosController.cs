@@ -95,12 +95,37 @@ public class ProductosController : ControllerBase
 
         if (producto == null)
         {
-            return NotFound();
+            return NotFound("El producto no existe.");
         }
 
-        producto.Codigo = productoActualizado.Codigo;
-        producto.Nombre = productoActualizado.Nombre;
-        producto.Categoria = productoActualizado.Categoria;
+        var categoria = await _context.Categorias
+            .FindAsync(productoActualizado.CategoriaId);
+
+        if (categoria == null)
+        {
+            return BadRequest("La categoría seleccionada no existe.");
+        }
+
+        if (string.IsNullOrWhiteSpace(productoActualizado.Nombre))
+        {
+            return BadRequest("El nombre del producto es obligatorio.");
+        }
+
+        if (productoActualizado.PrecioCompra < 0 ||
+            productoActualizado.PrecioVenta < 0 ||
+            productoActualizado.Stock < 0 ||
+            productoActualizado.StockMinimo < 0)
+        {
+            return BadRequest(
+                "Los precios y las cantidades no pueden ser negativos."
+            );
+        }
+
+        // El código original se conserva.
+        // No debe modificarse desde el formulario de edición.
+
+        producto.Nombre = productoActualizado.Nombre.Trim();
+        producto.CategoriaId = productoActualizado.CategoriaId;
         producto.PrecioCompra = productoActualizado.PrecioCompra;
         producto.PrecioVenta = productoActualizado.PrecioVenta;
         producto.Stock = productoActualizado.Stock;
@@ -112,6 +137,7 @@ public class ProductosController : ControllerBase
         return NoContent();
     }
 
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> EliminarProducto(int id)
     {
@@ -119,13 +145,20 @@ public class ProductosController : ControllerBase
 
         if (producto == null)
         {
-            return NotFound();
+            return NotFound("El producto no existe.");
         }
 
-        _context.Productos.Remove(producto);
+        if (!producto.Activo)
+        {
+            return NoContent();
+        }
+
+        // Eliminación lógica: conservamos el registro
+        producto.Activo = false;
 
         await _context.SaveChangesAsync();
 
         return NoContent();
     }
+
 }
